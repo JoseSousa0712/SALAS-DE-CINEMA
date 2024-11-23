@@ -1,0 +1,199 @@
+### TPC5: Aplicação para Gerir um Cinema
+
+Suponha que está a desenvolver uma aplicacão para gestão de um conjunto de salas de cinema de um centro comercial. 
+Nesse centro comercial existem algumas salas de cinema (que poderão estar a exibir filmes ou não), cada sala tem uma determinada 
+lotação, uma lista com a referência dos bilhetes vendidos (lugares ocupados; cada lugar é identificado por um número inteiro), e cada sala tem um filme associado.
+
+Considera a seguinte sugestão para o modelo dos cinemas:
+```
+Cinema = [Sala]
+Sala = [nlugares, Vendidos, filme]
+nlugares = Int
+filme = String 
+Vendidos = [Int]
+```
+  
+Que poderá ser usado num programa da seguinte forma:
+```
+sala1 = (150, [], "Twilight")
+sala2 = (200, [], "Hannibal")
+cinema1 = []
+...
+cinema1 = inserirSala(cinema1,sala1)
+cinema1 = inserirSala(cinema1,sala2)
+...
+listar(cinema1)
+...
+
+if(disponivel(cinema1, "Twilight", 17 )):
+  cinema1 = vendebilhete(cinema1, "Twilight", 17 )
+...
+listardisponibilidades(cinema1)
+...
+```
+
+Especifique as funções utilizadas no exemplo:
+
+1. `listar( cinema )` - que lista no monitor todos os filmes que estão em exibição nas salas do cinema passado como argumento;
+2. `disponivel( cinema, filme, lugar )` - que dá como resultado **False** se o lugar lugar já estiver ocupado na sala onde o filme está a ser exibido e dará como resultado **True** se o inverso acontecer;
+3. `vendebilhete( cinema, filme, lugar )` - que dá como resultado um novo cinema resultante de acrescentar o lugar à lista dos lugares ocupados, na sala onde está a ser exibido o filme;
+4. `listardisponibilidades( cinema )` - que, para um dado cinema, lista no monitor para cada sala, o filme que está a ser exibido e o total de lugares disponíveis nessa sala (número de lugares na sala menos o número de lugares ocupados);
+5. `inserirSala( cinema, sala )` - que acrescenta uma sala nova a um cinema (devendo verificar se a sala já existe);
+6. Acrescente todas as outras funcionalidades que achar necessárias;
+7. À semelhança do exercício 3, construa uma aplicação com um menu de interface para as operações.
+
+
+ALUNO: José Carlos de Barros e Sousa - A5851
+
+
+CÓDIGO
+
+
+### MOSTRA TODOS FILMES EM EXIBIÇÃO
+
+
+def listar(cinema):
+    print("\nFilmes em exibição:")
+    for sala in cinema:
+        print(f" - {sala['filme']}")
+
+### VERIFICA SE UM LUGAER ESTÁ DISPONIVEL PARA UM DETERMINADO FILME
+
+
+def disponivel(cinema, filme, lugar):
+    for sala in cinema:
+        if sala['filme'] == filme:
+            return lugar not in sala['vendidos']
+    return False
+
+### PROCEDE Á VENDA DE UM BILHETE PARA UM FILME E UM DETERMINADO LUGAR
+
+
+def vendebilhete(cinema, filme, lugar):
+    for sala in cinema:
+        if sala['filme'] == filme:
+            if lugar not in sala['vendidos'] and lugar <= sala['nlugares']:
+                sala['vendidos'].append(lugar)
+                print(f"Lugar {lugar} para o filme '{filme}' foi vendido com sucesso!")
+                return cinema
+            else:
+                print(f"Erro: Lugar {lugar} já está ocupado ou é inválido.")
+                return cinema
+    print(f"Erro: Filme '{filme}' não encontrado.")
+    return cinema
+
+### VERIFICA DISPONIBILIDADE DE UM FILME E RESPECTIVO LUGAR
+
+
+def listardisponibilidades(cinema):
+    print("\nDisponibilidades nas salas:")
+    for sala in cinema:
+        disponiveis = sala['nlugares'] - len(sala['vendidos'])
+        print(f"Filme: {sala['filme']} - Lugares disponíveis: {disponiveis}")
+
+### POSSIBILITA A INSERÇÃO DE UM FILME E RESPECTIVA CAPACIDADE
+
+def inserirSala(cinema, sala):
+    for s in cinema:
+        if s['filme'] == sala['filme']:
+            print(f"Erro: A sala com o filme '{sala['filme']}' já existe.")
+            return cinema
+    cinema.append(sala)
+    print(f"Sala para o filme '{sala['filme']}' adicionada com sucesso!")
+    return cinema
+
+### REMOVE FILME
+
+def removerSala(cinema, filme):
+    cinema = [sala for sala in cinema if sala['filme'] != filme]
+    print(f"Sala com o filme '{filme}' foi removida.")
+    return cinema
+
+### RETORNA A CAPACIDADE TOTAL DO CINEMA CONSIDERANDO TODAS AS SALAS/FILMES
+
+
+def capacidadeTotal(cinema):
+    total = sum(sala['nlugares'] for sala in cinema)
+    print(f"\nCapacidade total do cinema: {total} lugares.")
+
+
+### INICIA/CONFIGURA CINEMA
+
+def inicializarCinema():
+    cinema = []
+    num_salas = int(input("Digite o número de salas no cinema: "))
+    print("Digite os filmes que serão exibidos (1 filme por linha).")
+    print("Digite 'fim' quando terminar.")
+    filmes = []
+    while True:
+        filme = input("Filme: ")
+        if filme.lower() == "fim":
+            break
+        filmes.append(filme)
+        if len(filmes) == num_salas:
+            print("Todas as salas configuradas.")
+            break
+    
+    if len(filmes) < num_salas:
+        print(f"Atenção: Você configurou {len(filmes)} filmes, mas possui {num_salas} salas. Salas restantes ficarão vazias.")
+
+    for i in range(num_salas):
+        filme = filmes[i] if i < len(filmes) else "Sem Filme"
+        nlugares = int(input(f"Digite o número de lugares para a sala {i + 1} ({filme}): "))
+        sala = {"nlugares": nlugares, "vendidos": [], "filme": filme}
+        cinema.append(sala)
+
+    print("\nCinema configurado com sucesso!")
+    return cinema
+
+### MENU DE INTERACÇÃO COM UTILIZADOR
+
+
+def menu():
+    cinema = inicializarCinema()
+    while True:
+        print("\nMenu:")
+        print("1. Listar filmes")
+        print("2. Verificar disponibilidade")
+        print("3. Vender bilhete")
+        print("4. Listar disponibilidades")
+        print("5. Inserir sala")
+        print("6. Remover sala")
+        print("7. Mostrar capacidade total")
+        print("0. Sair")
+        opcao = input("Escolha uma opção: ")
+
+        if opcao == "1":
+            listar(cinema)
+        elif opcao == "2":
+            filme = input("Digite o nome do filme: ")
+            lugar = int(input("Digite o lugar: "))
+            if disponivel(cinema, filme, lugar):
+                print("Lugar disponível.")
+            else:
+                print("Lugar ocupado ou filme não encontrado.")
+        elif opcao == "3":
+            filme = input("Digite o nome do filme: ")
+            lugar = int(input("Digite o lugar: "))
+            cinema = vendebilhete(cinema, filme, lugar)
+        elif opcao == "4":
+            listardisponibilidades(cinema)
+        elif opcao == "5":
+            nlugares = int(input("Digite o número de lugares da sala: "))
+            filme = input("Digite o nome do filme: ")
+            sala = {"nlugares": nlugares, "vendidos": [], "filme": filme}
+            cinema = inserirSala(cinema, sala)
+        elif opcao == "6":
+            filme = input("Digite o nome do filme para remover: ")
+            cinema = removerSala(cinema, filme)
+        elif opcao == "7":
+            capacidadeTotal(cinema)
+        elif opcao == "0":
+            print("Saindo...")
+            break
+        else:
+            print("Opção inválida. Tente novamente.")
+menu()
+
+
+

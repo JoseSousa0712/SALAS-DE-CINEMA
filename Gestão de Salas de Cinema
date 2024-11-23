@@ -1,0 +1,121 @@
+def listar(cinema):
+    print("\nFilmes em exibição:")
+    for sala in cinema:
+        print(f" - {sala['filme']}")
+
+def disponivel(cinema, filme, lugar):
+    for sala in cinema:
+        if sala['filme'] == filme:
+            return lugar not in sala['vendidos']
+    return False
+
+def vendebilhete(cinema, filme, lugar):
+    for sala in cinema:
+        if sala['filme'] == filme:
+            if lugar not in sala['vendidos'] and lugar <= sala['nlugares']:
+                sala['vendidos'].append(lugar)
+                print(f"Lugar {lugar} para o filme '{filme}' foi vendido com sucesso!")
+                return cinema
+            else:
+                print(f"Erro: Lugar {lugar} já está ocupado ou é inválido.")
+                return cinema
+    print(f"Erro: Filme '{filme}' não encontrado.")
+    return cinema
+
+def listardisponibilidades(cinema):
+    print("\nDisponibilidades nas salas:")
+    for sala in cinema:
+        disponiveis = sala['nlugares'] - len(sala['vendidos'])
+        print(f"Filme: {sala['filme']} - Lugares disponíveis: {disponiveis}")
+
+def inserirSala(cinema, sala):
+    for s in cinema:
+        if s['filme'] == sala['filme']:
+            print(f"Erro: A sala com o filme '{sala['filme']}' já existe.")
+            return cinema
+    cinema.append(sala)
+    print(f"Sala para o filme '{sala['filme']}' adicionada com sucesso!")
+    return cinema
+
+def removerSala(cinema, filme):
+    cinema = [sala for sala in cinema if sala['filme'] != filme]
+    print(f"Sala com o filme '{filme}' foi removida.")
+    return cinema
+
+def capacidadeTotal(cinema):
+    total = sum(sala['nlugares'] for sala in cinema)
+    print(f"\nCapacidade total do cinema: {total} lugares.")
+
+def inicializarCinema():
+    cinema = []
+    num_salas = int(input("Digite o número de salas no cinema: "))
+    print("Digite os filmes que serão exibidos (1 filme por linha).")
+    print("Digite 'fim' quando terminar.")
+    filmes = []
+    while True:
+        filme = input("Filme: ")
+        if filme.lower() == "fim":
+            break
+        filmes.append(filme)
+        if len(filmes) == num_salas:
+            print("Todas as salas configuradas.")
+            break
+    
+    if len(filmes) < num_salas:
+        print(f"Atenção: Você configurou {len(filmes)} filmes, mas possui {num_salas} salas. Salas restantes ficarão vazias.")
+
+    for i in range(num_salas):
+        filme = filmes[i] if i < len(filmes) else "Sem Filme"
+        nlugares = int(input(f"Digite o número de lugares para a sala {i + 1} ({filme}): "))
+        sala = {"nlugares": nlugares, "vendidos": [], "filme": filme}
+        cinema.append(sala)
+
+    print("\nCinema configurado com sucesso!")
+    return cinema
+
+def menu():
+    cinema = inicializarCinema()
+    while True:
+        print("\nMenu:")
+        print("1. Listar filmes")
+        print("2. Verificar disponibilidade")
+        print("3. Vender bilhete")
+        print("4. Listar disponibilidades")
+        print("5. Inserir sala")
+        print("6. Remover sala")
+        print("7. Mostrar capacidade total")
+        print("0. Sair")
+        opcao = input("Escolha uma opção: ")
+
+        if opcao == "1":
+            listar(cinema)
+        elif opcao == "2":
+            filme = input("Digite o nome do filme: ")
+            lugar = int(input("Digite o lugar: "))
+            if disponivel(cinema, filme, lugar):
+                print("Lugar disponível.")
+            else:
+                print("Lugar ocupado ou filme não encontrado.")
+        elif opcao == "3":
+            filme = input("Digite o nome do filme: ")
+            lugar = int(input("Digite o lugar: "))
+            cinema = vendebilhete(cinema, filme, lugar)
+        elif opcao == "4":
+            listardisponibilidades(cinema)
+        elif opcao == "5":
+            nlugares = int(input("Digite o número de lugares da sala: "))
+            filme = input("Digite o nome do filme: ")
+            sala = {"nlugares": nlugares, "vendidos": [], "filme": filme}
+            cinema = inserirSala(cinema, sala)
+        elif opcao == "6":
+            filme = input("Digite o nome do filme para remover: ")
+            cinema = removerSala(cinema, filme)
+        elif opcao == "7":
+            capacidadeTotal(cinema)
+        elif opcao == "0":
+            print("Saindo...")
+            break
+        else:
+            print("Opção inválida. Tente novamente.")
+menu()
+
